@@ -1,0 +1,7 @@
+openai==1.60.2
+python-pptx==0.6.21
+requests==2.31.0
+flask==3.1.0
+google-cloud-storage==2.10.0
+pandas==2.1.0
+openpyxl==3.1.2

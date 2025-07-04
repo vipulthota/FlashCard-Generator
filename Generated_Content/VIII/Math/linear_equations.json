@@ -1,0 +1,62 @@
+[
+    {
+        "type": "[L_TS]",
+        "title": "Linear Equations",
+        "subtitle": "Mathematics - Class VIII",
+        "content": ""
+    },
+    {
+        "type": "[L_CS]",
+        "title": "What are Linear Equations",
+        "subtitle": "",
+        "content": "1. A linear equation is an equation of the first degree.\n2. It can be expressed in the form ax + b = 0, where a and b are constants.\n3. The graph of a linear equation is a straight line."
+    },
+    {
+        "type": "[L_CS]",
+        "title": "Standard Form of Linear Equations",
+        "subtitle": "",
+        "content": "1. The standard form is Ax + By = C.\n2. A, B, and C are real numbers, and A and B cannot be both zero.\n3. This form helps identify the slope and y-intercept of the line."
+    },
+    {
+        "type": "[L_CS]",
+        "title": "Types of Linear Equations",
+        "subtitle": "",
+        "content": "1. One variable: ax + b = 0.\n2. Two variables: Ax + By = C.\n3. Examples include equations representing lines in different contexts."
+    },
+    {
+        "type": "[L_CS]",
+        "title": "Solving Linear Equations",
+        "subtitle": "",
+        "content": "1. To solve, isolate the variable on one side of the equation.\n2. Use inverse operations to simplify the equation.\n3. Example: to solve 2x + 3 = 11, subtract 3 and then divide by 2."
+    },
+    {
+        "type": "[L_CS]",
+        "title": "Graphing Linear Equations",
+        "subtitle": "",
+        "content": "1. Use the slope-intercept form y = mx + b for graphing.\n2. The slope (m) indicates the steepness, and b is the y-intercept.\n3. Plot the y-intercept and use the slope to find another point."
+    },
+    {
+        "type": "[L_CS]",
+        "title": "Applications of Linear Equations",
+        "subtitle": "",
+        "content": "1. Linear equations are used in real-world problems, like budgeting.\n2. They help in understanding relationships in science and economics.\n3. Examples include calculating distance, speed, and time."
+    },
+    {
+        "type": "[L_CS]",
+        "title": "Word Problems in Linear Equations",
+        "subtitle": "",
+        "content": "1. Translate real-world situations into equations.\n2. Identify variables and constants from the problem statement.\n3. Solve the equation to find the answer, then interpret it in context."
+    },
+    {
+        "type": "[L_CS]",
+        "title": "Common Mistakes When Solving Linear Equations",
+        "subtitle": "",
+        "content": "1. Forgetting to apply the same operation to both sides.\n2. Mistaking the variable for a constant.\n3. Not simplifying the equation correctly."
+    },
+    {
+        "type": "[L_THS]",
+        "title": "Thank You for Your Attention",
+        "subtitle": "",
+        "content": ""
+    }
+]

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File</title>
+</head>
+<body>
+    <h2>Upload an Excel File for Analysis</h2>
+    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <h2>Analysis Results</h2>
+    <div id="analysis-results">
+        <p>Total Students: <span id="total-students"></span></p>
+        <p>Class Average: <span id="class-average"></span></p>
+        <p>Highest Score: <span id="highest-score"></span></p>
+        <p>Lowest Score: <span id="lowest-score"></span></p>
+        <p>Most Failed Subject: <span id="most-failed-subject"></span></p>
+        <p>Pass Rate: <span id="pass-rate"></span></p>
+        <p>Fail Rate: <span id="fail-rate"></span></p>
+    </div>
+
+    <button id="preview-button">Preview</button>
+    <button id="download-button" style="display:none;">Download</button>
+
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById('preview-button').style.display = 'block';
+                }
+            });
+        });
+
+        document.getElementById('preview-button').addEventListener('click', function() {
+            fetch('/analysis_results')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-students').textContent = data.total_students;
+                    document.getElementById('class-average').textContent = data.class_avg;
+                    document.getElementById('highest-score').textContent = data.highest_score;
+                    document.getElementById('lowest-score').textContent = data.lowest_score;
+                    document.getElementById('most-failed-subject').textContent = data.most_failed_subject;
+                    document.getElementById('pass-rate').textContent = data.pass_rate;
+                    document.getElementById('fail-rate').textContent = data.fail_rate;
+                    document.getElementById('download-button').style.display = 'block';
+                });
+        });
+
+        document.getElementById('download-button').addEventListener('click', function() {
+            window.location.href = '/download_report';
+        });
+    </script>
+</body>
+</html>

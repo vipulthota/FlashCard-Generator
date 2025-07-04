@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate PowerPoint</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <style>
+        /* Remove the rotate animation */
+        #loading img {            /* animation: rotate 1s linear infinite; */
+
+            /* animation: rotate 1s linear infinite; */
+        }
+    </style>
+    <script>
+        function validateForm() {
+            const numSlides = document.getElementById('num_slides').value;
+            if (numSlides <= 2) {
+                alert('Please enter a number greater than 2 for the number of slides.');
+                return false;
+            }
+            return true;
+        }
+        
+        function updateSlides(response) {
+            const slidesContainer = document.getElementById("slides-preview");
+            slidesContainer.innerHTML = "";
+
+            response.slides.forEach((slide, index) => {
+                let bgColor = "bg-white";
+                let titleColor = "text-black";
+                if (slide.type === "[L_TS]") {
+                    bgColor = "bg-blue-100";
+                    titleColor = "text-blue-700";
+                } else if (slide.type === "[L_CS]") {
+                    bgColor = "bg-green-100";
+                    titleColor = "text-green-700";
+                } else if (slide.type === "[L_THS]") {
+                    bgColor = "bg-yellow-100";
+                    titleColor = "text-yellow-700";
+                }
+
+                slidesContainer.innerHTML += `
+                    <div id="slide-${index}" class="mb-4 relative ${bgColor} p-4 border border-gray-300 rounded-lg transition-transform transform hover:scale-105 w-[30rem] h-[20rem] flex items-center justify-center">
+                        <div class="flex flex-col gap-2 text-center">
+                            <h3 class="font-semibold text-2xl ${titleColor}">${slide.title}</h3>
+                            <p class="text-xl">${slide.content.replace(/\n/g, '<br>')}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Show the "Download PDF" button
+            document.getElementById("download-pdf-btn").classList.remove("hidden");
+        }
+
+        function downloadImagesAndPDF() {
+            const slidesContainer = document.getElementById("slides-preview");
+            const slides = slidesContainer.children;
+            const pdf = new jspdf.jsPDF({
+                orientation: 'landscape',
+                unit: 'in',
+                format: [6, 4]
+            });
+            const imagePromises = [];
+
+            Array.from(slides).forEach((slide, index) => {
+                imagePromises.push(
+                    html2canvas(slide).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const imgWidth = 6; // 6 inches
+                        const imgHeight = 4; // 4 inches
+
+                        if (index > 0) {
+                            pdf.addPage();
+                        }
+                        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+                        // Save individual image to local directory
+                        return fetch('/save_image', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                imageData: imgData,
+                                filename: `slide-${index + 1}.png`
+                            })
+                        });
+                    })
+                );
+            });
+
+            Promise.all(imagePromises).then(() => {
+                // Download PDF after processing all slides
+                pdf.save('flashcards.pdf');
+            });
+        }
+
+        // Function to adjust textarea height dynamically
+        function adjustHeight(textarea) {
+            textarea.style.height = "auto";  // Reset height to recalculate
+            textarea.style.height = textarea.scrollHeight + "px";  // Set new height
+        }
+
+        function previewSlides(event) {
+            event.preventDefault();
+
+            const formData = new FormData(document.getElementById("pptForm"));
+            fetch("/preview", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    updateSlides(data);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+
+        function loadClasses() {
+            fetch("/get_classes")
+                .then(response => response.json())
+                .then(data => {
+                    const classSelect = document.getElementById("class_name");
+                    data.classes.forEach(className => {
+                        const option = document.createElement("option");
+                        option.value = className;
+                        option.textContent = className;
+                        classSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Error loading classes:", error));
+        }
+
+        function loadSubjects() {
+            const className = document.getElementById("class_name").value;
+            fetch(`/get_subjects/${className}`)
+                .then(response => response.json())
+                .then(data => {
+                    const subjectSelect = document.getElementById("subject");
+                    subjectSelect.innerHTML = '<option value="" disabled selected>Select a subject</option>';
+                    data.subjects.forEach(subject => {
+                        const option = document.createElement("option");
+                        option.value = subject;
+                        option.textContent = subject;
+                        subjectSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Error loading subjects:", error));
+        }
+
+        function loadTopics() {
+            const className = document.getElementById("class_name").value;
+            const subject = document.getElementById("subject").value;
+            fetch(`/get_topics/${className}/${subject}`)
+                .then(response => response.json())
+                .then(data => {
+                    const topicSelect = document.getElementById("topic");
+                    topicSelect.innerHTML = '<option value="" disabled selected>Select a topic</option>';
+                    data.topics.forEach(topic => {
+                        const option = document.createElement("option");
+                        option.value = topic;
+                        option.textContent = topic.replace(/_/g, ' ').replace('.json', '');
+                        topicSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Error loading topics:", error));
+        }
+
+        document.addEventListener("DOMContentLoaded", loadClasses);
+    </script>
+</head>
+
+<body class="flex justify-center items-center min-h-screen bg-[#FBF8EF] relative">
+    <div class="flex w-[90%] max-w-[1200px] bg-white shadow-lg rounded-lg p-6">
+        <!-- Left: Form Input Fields -->
+        <div class="w-1/3 pr-6 border-r border-gray-300">
+            
+            <h2 class="text-2xl font-bold mb-4">PPTX Generator</h2>
+            <form id="pptForm" class="flex flex-col gap-4" onsubmit="previewSlides(event)">
+                <label class="text-[#201A09] text-base font-medium">Class:</label>
+                <select id="class_name" name="class_name" required class="form-input p-2 border border-gray-300 rounded-md" onchange="loadSubjects()">
+                    <option value="" disabled selected>Select a class</option>
+                </select>
+
+                <label class="text-[#201A09] text-base font-medium">Subject:</label>
+                <select id="subject" name="subject" required class="form-input p-2 border border-gray-300 rounded-md" onchange="loadTopics()">
+                    <option value="" disabled selected>Select a subject</option>
+                </select>
+
+                <label class="text-[#201A09] text-base font-medium">Topic:</label>
+                <select id="topic" name="topic" required class="form-input p-2 border border-gray-300 rounded-md">
+                    <option value="" disabled selected>Select a topic</option>
+                </select>
+
+                <button type="submit" class="bg-[#FAC638] text-[#AB2217] font-bold p-2 rounded-md">Preview Slides</button>
+            </form>
+        </div>
+
+        <!-- Right: Slide Content Preview -->
+        <div class="w-2/3 pl-6">
+            <h2 class="text-2xl font-bold mb-4">Slide Content Preview</h2>
+            <form id="editSlidesForm" action="/generate" method="POST">
+                <input type="hidden" id="edit-topic" name="topic">
+                <input type="hidden" id="edit-subject" name="subject">
+                <input type="hidden" id="edit-class_name" name="class_name">
+                <input type="hidden" id="edit-num_slides" name="num_slides">
+                <div id="slides-preview" class="space-y-4"></div>
+                <button id="generate-btn" type="submit" class="hidden bg-green-500 text-white p-2 rounded-md">Generate & Download PPT</button>
+            </form>
+            <button id="download-pdf-btn" onclick="downloadImagesAndPDF()" class="hidden mt-4 bg-blue-500 text-white p-2 rounded-md">Download PDF</button>
+        </div>
+    </div>
+</body>
+</html>
